@@ -1,2 +1,9 @@
-package peaksoft.dto.dtoInstructor;public record InstructorRequest() {
+package peaksoft.dto.dtoInstructor;
+
+import lombok.Builder;
+import peaksoft.enums.Specialization;
+@Builder
+public record InstructorRequest(String firstName, String lastName, Specialization specialization) {
+    public InstructorRequest {
+    }
 }

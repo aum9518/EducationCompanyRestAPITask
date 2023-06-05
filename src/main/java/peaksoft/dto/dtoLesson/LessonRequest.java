@@ -1,2 +1,4 @@
-package peaksoft.dto.dtoLesson;public record LessonRequest() {
+package peaksoft.dto.dtoLesson;
+
+public record LessonRequest(String lessonName) {
 }
