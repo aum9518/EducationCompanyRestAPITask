@@ -2,21 +2,22 @@ package peaksoft.service.serviceImpl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import peaksoft.dto.SimpleResponse;
 import peaksoft.dto.dtoInstructor.InstructorRequest;
 import peaksoft.dto.dtoInstructor.InstructorResponse;
-import peaksoft.entity.Company;
-import peaksoft.entity.Course;
-import peaksoft.entity.Group;
-import peaksoft.entity.Instructor;
+import peaksoft.entity.*;
+import peaksoft.enums.Role;
 import peaksoft.exception.MyException;
 import peaksoft.repository.CompanyRepository;
 import peaksoft.repository.InstructorRepository;
+import peaksoft.repository.UserRepository;
 import peaksoft.service.InstructorService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,6 +25,8 @@ import java.util.List;
 public class InstructorServiceImpl implements InstructorService {
     private final InstructorRepository repository;
     private final CompanyRepository companyRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     @Override
     public List<InstructorResponse> getAllInstructors() {
         return repository.getAllInstructor();
@@ -31,10 +34,20 @@ public class InstructorServiceImpl implements InstructorService {
 
     @Override
     public InstructorResponse saveInstructor(InstructorRequest instructorRequest) {
+        User user = new User();
         Instructor instructor = new Instructor();
         instructor.setFirstName(instructorRequest.firstName());
         instructor.setLastName(instructorRequest.lastName());
         instructor.setSpecialization(instructorRequest.specialization());
+
+        user.setEmail(instructorRequest.email());
+        user.setPassword(passwordEncoder.encode(instructorRequest.password()));
+        user.setRole(Role.INSTRUCTOR);
+
+        user.setInstructor(instructor);
+        instructor.setUser(user);
+
+        userRepository.save(user);
         repository.save(instructor);
         return InstructorResponse.builder()
                 .id(instructor.getId())
@@ -74,23 +87,26 @@ public class InstructorServiceImpl implements InstructorService {
         try{
             Group group = new Group();
             Instructor instructor = repository.findById(id).orElseThrow(() -> new MyException("Instructor with id: " + id + " is not found"));
-            for (Group g : repository.getCoursesGroup(1L)) {
-                group.setId(g.getId());
-                group.setGroupName(g.getGroupName());
-                group.setStudents(g.getStudents());
-                group.setDescription(g.getDescription());
-                group.setCourses(g.getCourses());
-                group.setImageLink(g.getImageLink());
-            }
-           /* List<Group> groups = new ArrayList<>();
-            groups.addAll(repository.getCoursesGroup(1L))*/
+//            for (Group g : repository.getCoursesGroup(1L)) {
+//                group.setId(g.getId());
+//                group.setGroupName(g.getGroupName());
+//                group.setStudents(g.getStudents());
+//                group.setDescription(g.getDescription());
+//                group.setCourses(g.getCourses());
+//                group.setImageLink(g.getImageLink());
+//            }
+            List<Group> groups = repository.getInstructorsCourses(id);
+            List<String> groupName = new ArrayList<>();
+            if (!groups.isEmpty()){
+                groupName= groups.stream().map(Group::getGroupName).collect(Collectors.toList());
+            } else throw new MyException("Instructor's group does not exist yet");
 
             return InstructorResponse.builder()
                     .id(instructor.getId())
                     .firstName(instructor.getFirstName())
                     .lastName(instructor.getLastName())
                     .specialization(instructor.getSpecialization())
-                    .groupName(group.getGroupName())
+                    .groupName(groupName)
                     .studentsQuantity(group.getStudents().size())
                     .build();
         }catch(MyException e){
@@ -103,6 +119,13 @@ public class InstructorServiceImpl implements InstructorService {
     public SimpleResponse deleteInstructorById(Long id) {
         try{
             if (repository.existsById(id)){
+                Instructor instructor = repository.findById(id).orElseThrow(() -> new MyException("Instructor with id: " + id + " is not found"));
+                List<Company> allInstructorCompany = repository.getAllInstructorCompany(id);
+                for (Company c:allInstructorCompany) {
+                  Long comId = c.getId();
+                    Company company = companyRepository.findById(comId).orElseThrow(() -> new MyException("Instructor with id: " + id + " is not found"));
+                    company.getInstructor().remove(instructor);
+                }
                 repository.deleteById(id);
                 return SimpleResponse.builder()
                         .status("worked")

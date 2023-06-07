@@ -38,8 +38,9 @@ public class GroupServiceImpl implements GroupService {
             group.setGroupName(groupRequest.name());
             group.setImageLink(groupRequest.imageLink());
             group.setDescription(groupRequest.description());
+            courses.add(courseRepository.findById(courseId).orElseThrow(()->new MyException("Course with Id not found")));
             group.setCourses(courses);
-            group.getCourses().add(courseRepository.findById(courseId).orElseThrow(()->new MyException("Course with Id not found")));
+           // group.getCourses().add(courseRepository.findById(courseId).orElseThrow(()->new MyException("Course with Id not found")));
             repository.save(group);
             return GroupResponse.builder()
                     .id(group.getId())

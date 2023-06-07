@@ -20,11 +20,15 @@ public class Instructor {
     private Long id;
     private String firstName;
     private String lastName;
+    @Column(unique = true)
+    private String email;
     @Enumerated(EnumType.STRING)
     private Specialization specialization;
-    @ManyToMany(cascade = {CascadeType.DETACH,CascadeType.MERGE,CascadeType.REFRESH})
+    @ManyToMany(mappedBy = "instructor",cascade = {CascadeType.DETACH,CascadeType.MERGE,CascadeType.REFRESH})
     private List<Company> companies;
     @OneToMany(mappedBy = "instructor",cascade = {CascadeType.DETACH,CascadeType.MERGE,CascadeType.REFRESH})
     private List<Course> courses;
+    @OneToOne(cascade = {CascadeType.ALL})
+    private User user;
 
 }

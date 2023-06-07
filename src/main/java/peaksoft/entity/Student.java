@@ -32,4 +32,6 @@ public class Student {
     private Boolean isBlocked;
     @ManyToOne(cascade = {CascadeType.DETACH,CascadeType.MERGE,CascadeType.REFRESH})
     private Group group;
+    @OneToOne(cascade = {CascadeType.ALL})
+    private User user;
 }

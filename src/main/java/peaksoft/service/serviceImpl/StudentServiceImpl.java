@@ -2,15 +2,19 @@ package peaksoft.service.serviceImpl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import peaksoft.dto.SimpleResponse;
 import peaksoft.dto.dtoStudent.StudentRequest;
 import peaksoft.dto.dtoStudent.StudentResponse;
 import peaksoft.entity.Group;
 import peaksoft.entity.Student;
+import peaksoft.entity.User;
+import peaksoft.enums.Role;
 import peaksoft.exception.MyException;
 import peaksoft.repository.GroupRepository;
 import peaksoft.repository.StudentRepository;
+import peaksoft.repository.UserRepository;
 import peaksoft.service.StudentService;
 
 import java.util.ArrayList;
@@ -22,6 +26,8 @@ import java.util.List;
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository repository;
     private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     @Override
     public List<StudentResponse> getAllStudents() {
         return repository.getAllStudents();
@@ -29,6 +35,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentResponse saveStudent(StudentRequest studentRequest) {
+        User user = new User();
         Student student = new Student();
         student.setFirstName(studentRequest.firstName());
         student.setLastName(studentRequest.lastName());
@@ -37,6 +44,16 @@ public class StudentServiceImpl implements StudentService {
         student.setStudyFormat(studentRequest.studyFormat());
         student.setGender(studentRequest.gender());
         student.setIsBlocked(false);
+
+
+        user.setRole(Role.STUDENT);
+        user.setPassword(passwordEncoder.encode(studentRequest.password()));
+        user.setEmail(studentRequest.email());
+
+        user.setStudent(student);
+        student.setUser(user);
+
+        userRepository.save(user);
         repository.save(student);
         return StudentResponse.builder()
                 .id(student.getId())
@@ -152,7 +169,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<StudentResponse> getAllStudentByFilter(String word) {
-       return repository.getAllStudentsByFilter(word);
+    public List<StudentResponse> getAllStudentByFilter(String word, Long id) {
+       return repository.getAllStudentsByFilter(word, id);
     }
 }

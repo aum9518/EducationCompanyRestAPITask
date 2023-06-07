@@ -1,6 +1,7 @@
 package peaksoft.service;
 
 import peaksoft.dto.SimpleResponse;
+import peaksoft.dto.dtoCompany.CompanyGetAllResponse;
 import peaksoft.dto.dtoCompany.CompanyRequest;
 import peaksoft.dto.dtoCompany.CompanyResponse;
 import peaksoft.dto.dtoCourse.CourseRequest;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.logging.SimpleFormatter;
 
 public interface CompanyService {
-    List<CompanyResponse> getAllCompanies();
+    List<CompanyGetAllResponse> getAllCompanies();
     CompanyResponse saveCompany(CompanyRequest companyRequest);
     CompanyResponse getCompanyById(Long id);
 

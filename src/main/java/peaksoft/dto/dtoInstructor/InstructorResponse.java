@@ -3,8 +3,12 @@ package peaksoft.dto.dtoInstructor;
 import lombok.Builder;
 import lombok.Getter;
 import peaksoft.enums.Specialization;
+
+import java.util.List;
+
 @Builder
-public record InstructorResponse(Long id, String firstName, String lastName, Specialization specialization,String groupName, int studentsQuantity) {
+public record InstructorResponse(Long id, String firstName, String lastName, Specialization specialization,
+                                 List<String> groupName, int studentsQuantity) {
     public InstructorResponse {
     }
 

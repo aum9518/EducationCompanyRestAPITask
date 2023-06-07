@@ -15,5 +15,5 @@ public interface StudentService {
     SimpleResponse assignStudentToGroup(Long studentId,Long groupId);
     SimpleResponse blockOrUnBlockStudent(Long id, Boolean isBlocked);
     List<StudentResponse> getAllBlockOrUnBlockStudents(Boolean isBlocked);
-    List<StudentResponse> getAllStudentByFilter(String word);
+    List<StudentResponse> getAllStudentByFilter(String word, Long id);
 }
