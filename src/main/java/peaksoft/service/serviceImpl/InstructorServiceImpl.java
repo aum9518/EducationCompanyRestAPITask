@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import peaksoft.config.JWTService;
 import peaksoft.dto.SimpleResponse;
 import peaksoft.dto.dtoInstructor.InstructorRequest;
 import peaksoft.dto.dtoInstructor.InstructorResponse;
@@ -27,6 +28,7 @@ public class InstructorServiceImpl implements InstructorService {
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JWTService jwtService;
     @Override
     public List<InstructorResponse> getAllInstructors() {
         return repository.getAllInstructor();
@@ -49,11 +51,15 @@ public class InstructorServiceImpl implements InstructorService {
 
         userRepository.save(user);
         repository.save(instructor);
+
+        String jwtToken = jwtService.generateToken(user);
+
         return InstructorResponse.builder()
                 .id(instructor.getId())
                 .firstName(instructor.getFirstName())
                 .lastName(instructor.getLastName())
                 .specialization(instructor.getSpecialization())
+                .token(jwtToken)
                 .build();
     }
 

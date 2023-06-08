@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import peaksoft.config.JWTService;
 import peaksoft.dto.SimpleResponse;
 import peaksoft.dto.dtoStudent.StudentRequest;
 import peaksoft.dto.dtoStudent.StudentResponse;
@@ -28,6 +29,7 @@ public class StudentServiceImpl implements StudentService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JWTService jwtService;
     @Override
     public List<StudentResponse> getAllStudents() {
         return repository.getAllStudents();
@@ -55,6 +57,9 @@ public class StudentServiceImpl implements StudentService {
 
         userRepository.save(user);
         repository.save(student);
+
+        String jwtToken = jwtService.generateToken(user);
+
         return StudentResponse.builder()
                 .id(student.getId())
                 .firstName(student.getFirstName())
@@ -64,6 +69,7 @@ public class StudentServiceImpl implements StudentService {
                 .studyFormat(student.getStudyFormat())
                 .gender(student.getGender())
                 .isBlocked(student.getIsBlocked())
+                .token(jwtToken)
                 .build();
     }
 
@@ -165,7 +171,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<StudentResponse> getAllBlockOrUnBlockStudents(Boolean isBlocked) {
-      return  repository.getAllByIsBlocked(isBlocked);
+//      return  repository.getAllByIsBlocked(isBlocked);
+        return null;
     }
 
     @Override
